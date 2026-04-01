@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:lottie/lottie.dart';
 
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
@@ -65,11 +66,38 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthSuccess) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => Center(
+              child: SizedBox(
+                width: 160,
+                height: 160,
+                child: Lottie.asset(
+                  'assets/lottie/success.json',
+                  repeat: false,
+                ),
+              ),
+            ),
+          );
+
+          await Future.delayed(const Duration(seconds: 1));
+
+          if (!context.mounted) return;
+
+          Navigator.of(context).pop();
+
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => UserInfoPage(email: emailController.text, name: nameController.text, phone: phoneController.text,))
+            MaterialPageRoute(
+              builder: (_) => UserInfoPage(
+                email: emailController.text,
+                name: nameController.text,
+                phone: phoneController.text,
+              ),
+            ),
           );
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +108,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.secondary,
-          title: Text("registration_page".tr(), style: AppTextStyles.px10blue),
+          title: Text(
+            "registration_page".tr(),
+            style: AppTextStyles.px10blue,
+          ),
           actions: [
             IconButton(
               icon: const Text("EN"),
@@ -120,7 +151,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return "email_empty".tr();
-                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) return "email_invalid".tr();
+                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                      return "email_invalid".tr();
+                    }
                     return null;
                   },
                 ),
@@ -135,7 +168,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return "phone_empty".tr();
-                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) return "phone_invalid".tr();
+                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return "phone_invalid".tr();
+                    }
                     return null;
                   },
                 ),
@@ -172,22 +207,46 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                        obscureConfirmPassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
-                        setState(() => obscureConfirmPassword = !obscureConfirmPassword);
+                        setState(() {
+                          obscureConfirmPassword = !obscureConfirmPassword;
+                        });
                       },
                     ),
                   ),
                   validator: (value) {
-                    if (value != passwordController.text) return "password_mismatch".tr();
+                    if (value != passwordController.text) {
+                      return "password_mismatch".tr();
+                    }
                     return null;
                   },
                 ),
                 const SizedBox(height: 25),
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
-                    if (state is AuthLoading) return const Center(child: CircularProgressIndicator());
+                    if (state is AuthLoading) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              height: 120,
+                              child: Lottie.asset(
+                                'assets/lottie/loading.json',
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text("Signing in..."),
+                          ],
+                        ),
+                      );
+                    }
+
                     return ElevatedButton(
                       onPressed: submitForm,
                       child: Text("register".tr()),

@@ -2,21 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'auth/bloc/auth_bloc.dart';
 import 'constant/colors.dart';
 import 'constant/text_styles_value.dart';
-import 'home/profile_page.dart';
-import 'profile/bloc/profile_bloc.dart';
-import 'profile/repositories/profile_repository.dart';
-import 'profile/services/api_service.dart';
-import 'profile/services/dio_client.dart';
+import 'home/registration_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-
-  final dio = DioClient.createDio();
-  final apiService = ApiService(dio);
-  final repository = ProfileRepository(apiService: apiService);
 
   runApp(
     EasyLocalization(
@@ -28,7 +21,7 @@ void main() async {
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: BlocProvider(
-        create: (_) => ProfileBloc(repository: repository),
+        create: (_) => AuthBloc(),
         child: const MyApp(),
       ),
     ),
@@ -41,7 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Profile App",
+      title: "Registration App",
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
@@ -51,7 +44,7 @@ class MyApp extends StatelessWidget {
           bodyMedium: AppTextStyles.px10blue,
         ),
       ),
-      home: const ProfilePage(),
+      home: const RegistrationPage(),
     );
   }
 }
